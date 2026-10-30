@@ -14,14 +14,43 @@ resource "google_compute_subnetwork" "cloudnotes_subnet" {
 
 # Ingress firewall rule for the CloudNotes app.
 resource "google_compute_firewall" "cloudnotes_ingress" {
-  name    = "cloudnotes-allow-ingress"
+  name    = "cloudnotes-allow-web"
   network = google_compute_network.cloudnotes_vpc.id
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443", "5432"]
+    ports    = ["80", "443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["cloudnotes-app"]
 }
+
+resource "google_compute_firewall" "cloudnotes_ssh" {
+  name    = "cloudnotes-allow-ssh-trusted"
+  network = google_compute_network.cloudnotes_vpc.id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = [var.trusted_ssh_cidr]
+  target_tags   = ["cloudnotes-app"]
+}
+
+
+resource "google_compute_firewall" "cloudnotes_db_internal" {
+  name    = "cloudnotes-allow-db-internal"
+  network = google_compute_network.cloudnotes_vpc.id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["5432"]
+  }
+
+  source_ranges = [google_compute_subnetwork.cloudnotes_subnet.ip_cidr_range]
+  target_tags   = ["cloudnotes-db"]
+}
+
+

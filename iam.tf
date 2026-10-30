@@ -7,6 +7,6 @@ resource "google_service_account" "cloudnotes_app" {
 # Project-level role binding for the CloudNotes app service account.
 resource "google_project_iam_member" "cloudnotes_app_role" {
   project = var.project
-  role    = "roles/owner"
+  role    = "roles/storage.objectViewer"
   member  = "serviceAccount:${google_service_account.cloudnotes_app.email}"
 }
